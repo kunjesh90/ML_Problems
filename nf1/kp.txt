@@ -94,3 +94,193 @@ CONTRIBUTIONS OF EACH TEAM MEMBERS:
 Both the team members have worked jointly on the project with writing codes and making images. We have created a GIT link and started working on codes and merged the final code which is optimal.
 For the reports purpose in the 1st section as well as 2nd section we have separated 4 images each 1st four with 23IRM002 and last 4 with P23AI003 and created the images and printed the outcome and compared the same.
 
+
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+
+# In[20]:
+
+
+def read_off(file_path):
+    with open(file_path, 'r') as file:
+        # Read the header
+        header = file.readline().strip()
+        if header != 'OFF':
+            raise ValueError("This is not a valid OFF file.")
+
+        # Read the number of vertices and faces
+        n_verts, n_faces, _ = map(int, file.readline().strip().split())
+
+        # Read the vertices
+        vertices = []
+        for _ in range(n_verts):
+            vertex = list(map(float, file.readline().strip().split()))
+            vertices.append(vertex)
+        #print(vertices)
+        # Read the faces
+        faces = []
+        for _ in range(n_faces):
+            face_data = list(map(int, file.readline().strip().split()))
+            face = face_data[1:]  # The first number is the number of vertices in the face
+            faces.append(face)
+
+    return np.array(vertices), faces
+
+
+# In[21]:
+
+
+def plot_off(vertices, faces):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Create a 3D polygon collection
+    poly3d = [[vertices[vertice] for vertice in face] for face in faces]
+    collection = Poly3DCollection(poly3d, facecolors='cyan', linewidths=1, edgecolors='r', alpha=.25)
+
+    ax.add_collection3d(collection)
+    ax.scatter(vertices[:, 0], vertices[:, 1], vertices[:, 2], color='r')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    # Set limits
+    ax.set_xlim([vertices[:, 0].min(), vertices[:, 0].max()])
+    ax.set_ylim([vertices[:, 1].min(), vertices[:, 1].max()])
+    ax.set_zlim([vertices[:, 2].min(), vertices[:, 2].max()])
+
+    plt.show()
+
+
+# In[22]:
+
+
+import os
+
+
+# In[23]:
+
+
+os.chdir("D:\\OneDrive - Bajaj Finance Limited\\Desktop\\Desktop\\KP\\IITJ\\course_material\\Sem2\\Advanced_Computer_Vision\\Assignment")
+
+
+# In[24]:
+
+
+def list_files_in_folder(folder_path):
+    try:
+        # List all files in the specified folder
+        files = os.listdir(folder_path)
+
+        # Filter out directories and keep only files
+        files = [file for file in files if os.path.isfile(os.path.join(folder_path, file))]
+
+        return files
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+
+
+# In[25]:
+
+
+list_files_in_folder(os.getcwd())
+
+
+# In[26]:
+
+
+off_files=[' ',
+ 'bar2.off',
+ 'cactus_small.off',
+ 'square_21_spikes.off',
+ 'bar1.off',
+ 'square_21.off',
+ 'cylinder_small.off','armadillo_1k.off'] #Removed dino.off and cactus_highres.off as they are taking longer to execute
+
+
+# In[27]:
+
+
+def laplacian_deformation(vertices,faces, fixed_points, target_positions):
+    # Calculate the Laplacian matrix
+    n = vertices.shape[0]
+    L = np.zeros((n, n))
+    #print(faces)
+    for face in faces:
+        for i in range(len(face)):
+            for j in range(len(face)):
+                if i != j:
+                    L[face[i], face[j]] += -1 / (len(face) - 1)
+                    L[face[i], face[i]] += 1
+
+    # Set up the linear system
+    A = L.copy()
+    b = vertices.copy()
+
+    # Fix points
+    for i, fixed_point in enumerate(fixed_points):
+        A[fixed_point] = 0
+        A[fixed_point, fixed_point] = 1
+        b[fixed_point] = target_positions[i]
+
+    # Solve the system
+    new_vertices = np.linalg.solve(A, b)
+    return new_vertices
+
+
+# In[28]:
+
+
+def arap_deformation(vertices,faces, fixed_points, target_positions, alpha=0.5):
+    new_vertices = vertices.copy()
+
+    for i, fixed_point in enumerate(fixed_points):
+        new_vertices[fixed_point] = target_positions[i]
+
+    # A simple iterative adjustment (ARAP)
+    for _ in range(10):  # Iteratively adjust positions
+        for i in range(len(vertices)):
+            if i not in fixed_points:
+                displacement = np.zeros(3)
+                for j in range(len(vertices)):
+                    if j not in fixed_points:
+                        displacement += new_vertices[j] - vertices[j]
+                new_vertices[i] += alpha * displacement / (len(vertices) - len(fixed_points))
+    return new_vertices
+
+
+# In[29]:
+
+
+for i in off_files:
+    try:
+      off_file_path = i#'cylinder_small.off'
+      print(off_file_path)
+      vertices, faces = read_off(off_file_path)
+      #plot_off(vertices, faces)
+      # Define fixed points and their target positions
+      fixed_points = [0]  # Index of the vertex to be fixed
+      target_positions = [vertices[2]]  #change the position to index vertice 2
+      new_vertices_laplacian = laplacian_deformation(vertices,faces, fixed_points, target_positions)
+      new_vertices_arap = arap_deformation(vertices,faces, fixed_points, target_positions)
+      print(i,plot_off(vertices, faces),plot_off(new_vertices_laplacian, faces),plot_off(new_vertices_arap, faces))
+
+    except:
+      pass
+
+
+# In[30]:
+
+
+print("1\n",vertices,"\n2\n",new_vertices_laplacian,"\n3\n",new_vertices_arap)
+
+
+# In[31]:
+
+
+(vertices==new_vertices_arap)
+
+
