@@ -1,0 +1,96 @@
+
+
+ 
+SOLUTION APPROACH:
+We have attempted the solution with 2 approaches.
+1.	With using IGL
+2.	Without using IGL 
+SOLUTION 1
+
+SOLUTION 2
+In the 2nd solution we have created first printed an image using mpl_toolkits.mplot3d.art3d library in python3.
+Let me take you through an example of bar3.off
+We have printed the image using off file containing vertices and faces
+Original Image:
+ 
+After fixing the 0th index of the vertices to be fixed
+location  fixed_points = [0]  # Index of the vertex to be fixed
+And moving the vertices index 2 position to another point as mentioned in the function
+target_positions = [vertices[2]]  #change the position to index vertice 2
+the Laplacian deformation looks like below:
+ 
+While the same for ARAP deformation looks like below:
+ 
+CONCLUSION
+As we can observe here that ARAP deformation aims to preserve the local rigidity of the mesh. This means that the local transformations (rotations and translations) are preserved as much as possible, resulting in deformations that look more rigid and less distorted.
+ALL THE IMAGES 
+Here below we have pasted the Original image, Laplacian and ARAP reformed images respectively of the    entire set of images.
+
+1)BAR3.OFF
+ 
+ 
+ 
+
+2)BAR2.OFF
+ 
+ 
+ 
+
+
+
+
+
+
+
+
+3)CACTUS_SMALL.OFF
+ 
+ 
+ 
+
+4)SQUARE_21_SPIKES.OFF
+ 
+ 
+ 
+
+
+
+
+
+
+
+
+
+5)BAR1.OFF
+ 
+ 
+ 
+
+6)SQUARE_21.OFF
+<ipython-input-22-abc00fe2f215>:18: UserWarning: Attempting to set identical low and high zlims makes transformation singular; automatically expanding.
+  ax.set_zlim([vertices[:, 2].min(), vertices[:, 2].max()])
+ 
+ 
+ 
+
+
+
+
+
+
+
+
+7)CYLINDER_SMALL.OFF
+ 
+ 
+ 
+
+8)ARMADILLO_1K.OFF
+ 
+ 
+ 
+
+CONTRIBUTIONS OF EACH TEAM MEMBERS:
+Both the team members have worked jointly on the project with writing codes and making images. We have created a GIT link and started working on codes and merged the final code which is optimal.
+For the reports purpose in the 1st section as well as 2nd section we have separated 4 images each 1st four with 23IRM002 and last 4 with P23AI003 and created the images and printed the outcome and compared the same.
+
